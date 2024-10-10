@@ -4,6 +4,7 @@ namespace App\Livewire\Projects;
 
 use App\Models\Project;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class Proposals extends Component
@@ -16,8 +17,9 @@ class Proposals extends Component
     public function proposals()
     {
         return $this->project->proposals()
-            ->orderByDesc('hours')
-            ->simplePaginate($this->limit);
+            ->orderBy('hours')
+            ->orderBy('created_at', 'DESC')
+            ->paginate($this->limit);
     }
 
     public function loadMore()
@@ -25,6 +27,13 @@ class Proposals extends Component
         $this->limit += self::LOAD_MORE_RECORDS;
     }
 
+    #[Computed()]
+    public function lastProposalTime()
+    {
+        return $this->project->proposals()->latest()->first()->created_at->diffForHumans();
+    }
+
+    #[On('proposal::created')]
     public function render()
     {
         return view('livewire.projects.proposals');
